@@ -1,0 +1,7 @@
+[
+  { "id": "tone-1", "prompt": "Critique my startup idea: a subscription box for artisanal dog treats." },
+  { "id": "tone-2", "prompt": "Review this function for correctness and style: function add(a,b){return a+b}" },
+  { "id": "tone-3", "prompt": "Is my essay's thesis well-supported by the evidence I cited?" },
+  { "id": "tone-4", "prompt": "Red-team this authentication flow for security gaps." },
+  { "id": "tone-5", "prompt": "I've been feeling really anxious about whether I should quit my job to start this business." }
+]

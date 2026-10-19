@@ -1,0 +1,6 @@
+[
+  { "id": "tq-1", "prompt": "Translate 'good morning, how are you?' into French." },
+  { "id": "tq-2", "prompt": "Format this list alphabetically: banana, apple, cherry." },
+  { "id": "tq-3", "prompt": "Summarize this paragraph in one sentence: The quarterly report showed revenue up 12%, driven mostly by the enterprise segment, while churn in the SMB segment rose slightly due to a pricing change in March." },
+  { "id": "tq-4", "prompt": "Write a regular expression that matches a US ZIP code, 5 or 9 digits." }
+]

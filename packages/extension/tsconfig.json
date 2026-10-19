@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist-types",
+    "rootDir": "src",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["chrome"],
+    "declaration": false,
+    "composite": false,
+    "noEmit": true
+  },
+  "references": [{ "path": "../core" }, { "path": "../registry" }],
+  "include": ["src"]
+}

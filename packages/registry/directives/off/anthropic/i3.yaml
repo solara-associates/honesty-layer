@@ -1,0 +1,6 @@
+id: off-anthropic-i3
+version: "2026-10-19"
+mode: "off"
+intensity: 3
+modelFamily: anthropic
+text: " "

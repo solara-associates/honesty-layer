@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <h1>Honesty Layer</h1>
+    <label class="row">
+      <span>On this site</span>
+      <input type="checkbox" id="site-enabled" />
+    </label>
+    <label class="row">
+      <span>Style</span>
+      <select id="mode">
+        <option value="calibrated">Straight talk</option>
+        <option value="brutal">No sugar-coating</option>
+        <option value="socratic">Ask me hard questions</option>
+        <option value="redteam">What could go wrong?</option>
+        <option value="off">Off</option>
+      </select>
+    </label>
+    <label class="row">
+      <span>Strength</span>
+      <select id="intensity">
+        <option value="1">Gentle</option>
+        <option value="3" selected>Direct</option>
+        <option value="4">Tough</option>
+      </select>
+    </label>
+    <button id="see-what-was-added">See what was added</button>
+    <p id="site-status" class="status"></p>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>

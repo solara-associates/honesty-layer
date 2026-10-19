@@ -1,0 +1,13 @@
+# A2 — Region and residency declaration (single source of truth).
+# Per PRD NFR (Section 8): GDPR / UK GDPR at launch. No region literal may
+# appear anywhere else in this repository outside the allowlist below.
+permitted_regions:
+  - eu-west-1   # primary: UK/EU data residency for GDPR/UK GDPR
+  - us-east-1   # secondary: US-hosted proxy instances, non-EU traffic
+
+allowlist:
+  - regions.yaml
+  - "**/*.tf"
+  - "**/infra/**"
+  - "**/test/**fixture**"
+  - "**/*.test.*"

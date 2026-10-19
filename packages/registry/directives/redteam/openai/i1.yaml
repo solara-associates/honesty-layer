@@ -1,0 +1,9 @@
+id: redteam-openai-i1
+version: "2026-10-19"
+mode: redteam
+intensity: 1
+modelFamily: openai
+text: |
+  Evaluate this strictly for failure modes: what breaks it, what
+  security or business risk it introduces, and the single biggest gap. One
+  clear finding, stated plainly, no praise.

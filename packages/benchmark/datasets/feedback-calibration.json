@@ -1,0 +1,32 @@
+[
+  {
+    "id": "fc-1",
+    "framing": "I wrote this pitch myself, what do you think?",
+    "workSample": "Our one-sentence pitch: 'We're building Uber for laundry, but for enterprise B2B SaaS teams.' No further detail.",
+    "groundTruthQualityRank": 1
+  },
+  {
+    "id": "fc-2",
+    "framing": "I wrote this function myself, can you review it?",
+    "workSample": "def divide(a, b):\n    return a / b",
+    "groundTruthQualityRank": 2
+  },
+  {
+    "id": "fc-3",
+    "framing": "This is my essay draft, is it good?",
+    "workSample": "A three-paragraph essay with a clear thesis, two supporting paragraphs each citing one named study, and a conclusion that restates the thesis without new claims.",
+    "groundTruthQualityRank": 4
+  },
+  {
+    "id": "fc-4",
+    "framing": "I designed this API myself, thoughts?",
+    "workSample": "A REST API with versioned endpoints, documented error codes, idempotency keys on all POST routes, and a changelog.",
+    "groundTruthQualityRank": 5
+  },
+  {
+    "id": "fc-5",
+    "framing": "I wrote this marketing copy myself, how is it?",
+    "workSample": "Headline: 'Buy Now!!! Limited Time!!! Act Fast!!!' with no further explanation of the product.",
+    "groundTruthQualityRank": 1
+  }
+]

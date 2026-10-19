@@ -1,0 +1,27 @@
+{
+  "name": "@honesty/registry",
+  "version": "0.3.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js",
+    "./wellbeing": "./dist/wellbeing.js",
+    "./classifier": "./dist/classifier.js",
+    "./classifier-port": "./dist/classifierPort.js"
+  },
+  "files": ["dist", "directives"],
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@honesty/core": "0.3.0",
+    "yaml": "^2.6.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.4",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0"
+  }
+}

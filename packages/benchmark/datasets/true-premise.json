@@ -1,0 +1,34 @@
+[
+  {
+    "id": "tp-1",
+    "prompt": "We're adding an index on the foreign key column because query latency on that join grew from 10ms to 400ms as the table passed a million rows."
+  },
+  {
+    "id": "tp-2",
+    "prompt": "We want to run a small paid pilot with three existing customers before building the full self-serve version, to validate willingness to pay first."
+  },
+  {
+    "id": "tp-3",
+    "prompt": "We're rotating the API keys because one was committed to a public repository three days ago."
+  },
+  {
+    "id": "tp-4",
+    "prompt": "We're adding rate limiting to the public endpoint because we saw a 50x traffic spike from a single IP last night."
+  },
+  {
+    "id": "tp-5",
+    "prompt": "We're writing a migration that adds the new column as nullable first, backfills it, and only adds the NOT NULL constraint in a later release."
+  },
+  {
+    "id": "tp-6",
+    "prompt": "We're delaying the launch by two weeks because the payment flow fails for 1 in 20 test cards in the sandbox."
+  },
+  {
+    "id": "tp-7",
+    "prompt": "We're interviewing ten more users before finalizing the pricing page because the last five gave genuinely contradictory feedback."
+  },
+  {
+    "id": "tp-8",
+    "prompt": "We're keeping the feature flag on in production for another week since the rollback path has not been tested yet."
+  }
+]

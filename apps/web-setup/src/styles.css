@@ -1,0 +1,136 @@
+:root {
+  color-scheme: light dark;
+  --bg: #0b1120;
+  --card: #111827;
+  --text: #f3f4f6;
+  --muted: #9ca3af;
+  --accent: #60a5fa;
+}
+body {
+  margin: 0;
+  font: 15px/1.5 system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+#app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+.card {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+.aha .side-by-side {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 560px) {
+  .aha .side-by-side {
+    grid-template-columns: 1fr;
+  }
+}
+.aha .without,
+.aha .with {
+  padding: 12px;
+  border-radius: 8px;
+}
+.aha .without {
+  background: #1f2937;
+}
+.aha .with {
+  background: #0f2e1f;
+  border: 1px solid #16a34a44;
+}
+.prompt {
+  font-style: italic;
+  color: var(--muted);
+}
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.choice {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+.choice.selected {
+  border-color: var(--accent);
+  background: #1e3a5f;
+}
+.choice .blurb {
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 220px;
+}
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.instruction-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #374151;
+}
+.screenshot-placeholder {
+  background: #1f2937;
+  border: 1px dashed #4b5563;
+  border-radius: 8px;
+  padding: 24px;
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: #0b1120;
+  color: var(--text);
+  border: 1px solid #374151;
+  border-radius: 8px;
+  padding: 10px;
+  font: 13px/1.4 ui-monospace, monospace;
+}
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  align-items: center;
+}
+.actions button,
+.actions a {
+  font: inherit;
+}
+button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: var(--text);
+  cursor: pointer;
+}
+.version-note {
+  font-size: 12px;
+  color: var(--muted);
+}

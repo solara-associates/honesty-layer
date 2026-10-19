@@ -1,0 +1,24 @@
+{
+  "name": "@honesty/benchmark",
+  "version": "0.3.0",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "honesty-bench": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "test": "vitest run",
+    "bench": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@honesty/core": "0.3.0",
+    "@honesty/registry": "0.3.0"
+  },
+  "devDependencies": {
+    "vitest": "^2.1.4",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0"
+  }
+}
