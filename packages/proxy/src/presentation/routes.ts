@@ -135,5 +135,35 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
     return reply.send(upstream.body);
   });
 
+  // F-7 Truth/Logic Evaluator: on-demand, never on the blocking request path above.
+  app.post("/v1/evaluate", async (request, reply) => {
+    const headers = headerAdapter(request.headers as Record<string, string | string[] | undefined>);
+
+    try {
+      extractActor(headers);
+    } catch (err) {
+      if (err instanceof InvalidActorError) return reply.code(401).send({ error: err.message });
+      throw err;
+    }
+
+    if (!container.evaluator) {
+      return reply.code(503).send({ error: "Evaluator not configured. Set HONESTY_JEV_BASE_URL to enable F-7." });
+    }
+
+    const body = request.body as { responseText?: unknown };
+    if (typeof body.responseText !== "string" || !body.responseText.trim()) {
+      return reply.code(400).send({ error: "Body must include a non-empty string field 'responseText'." });
+    }
+
+    try {
+      const verdict = await container.evaluator.evaluate(body.responseText);
+      return reply.send(verdict);
+    } catch {
+      // F-7 never blocks a model response and never fabricates a verdict:
+      // if the evaluator call fails, say so rather than guessing (A5.8).
+      return reply.code(502).send({ error: "Evaluator call failed; no verdict available." });
+    }
+  });
+
   app.get("/healthz", async () => ({ status: "ok" }));
 }

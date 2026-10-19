@@ -5,8 +5,8 @@ import type { Intensity, Mode } from "@honesty/core";
 const classifier = new RuleBasedTaskClassifier();
 
 /** F-1 input-stage classification + C-8 wellbeing safeguard, reused from @honesty/registry (not duplicated). */
-export function classifyAndSafeguard(userMessage: string, mode: Mode, intensity: Intensity) {
-  const classification = classifier.classify(userMessage);
+export async function classifyAndSafeguard(userMessage: string, mode: Mode, intensity: Intensity) {
+  const classification = await classifier.classify(userMessage);
   const decision = applyWellbeingSafeguard({ mode, intensity }, classification);
   return { classification, decision };
 }

@@ -28,7 +28,7 @@ export class InjectionService {
       return { directiveText: "", appliedId: null, skippedReason: "mode_off" };
     }
 
-    const classification = this.classifier.classify(params.userMessage);
+    const classification = await this.classifier.classify(params.userMessage);
 
     if (classification.isCrisis) {
       await this.auditSink.record(

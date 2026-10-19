@@ -23,7 +23,9 @@ const EVALUATIVE_PATTERNS = [
 
 /** F-1 input-stage classifier: rules today, a local model can sit behind TaskClassifierPort later. */
 export class RuleBasedTaskClassifier implements TaskClassifierPort {
-  classify(userMessage: string): TaskClassification {
+  // Synchronous under the hood; wrapped in a resolved promise to satisfy the
+  // (necessarily async, for network-backed implementations) port contract.
+  async classify(userMessage: string): Promise<TaskClassification> {
     const category: TaskCategory = this.categorize(userMessage);
     return new TaskClassification(category);
   }

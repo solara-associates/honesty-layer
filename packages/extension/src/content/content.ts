@@ -85,7 +85,7 @@ async function onBeforeSend(host: SiteHost) {
   const settings = await getSettings();
   if (settings.mode === "off" || !settings.enabledSites[host]) return;
 
-  const { decision } = classifyAndSafeguard(userText, settings.mode, settings.intensity);
+  const { decision } = await classifyAndSafeguard(userText, settings.mode, settings.intensity);
   if (decision.kind === "no_directive") {
     lastAppliedText = "";
     lastAppliedDirectiveId = null;

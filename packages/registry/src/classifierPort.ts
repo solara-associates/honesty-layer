@@ -6,5 +6,5 @@ import type { TaskClassification } from "@honesty/core";
  * without touching callers (PRD Section 5: "rules plus a small local model").
  */
 export interface TaskClassifierPort {
-  classify(userMessage: string): TaskClassification;
+  classify(userMessage: string): Promise<TaskClassification>;
 }
