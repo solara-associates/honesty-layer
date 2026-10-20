@@ -1,9 +1,10 @@
-import { detectSycophancy } from "@honesty/core";
+import { assessPushback, capitulatesWithoutJustification, detectSycophancy } from "@honesty/core";
 import { getDirectiveForHost } from "../shared/directives.js";
 import { loadSelectorConfig } from "../shared/selectorConfig.js";
 import { classifyAndSafeguard } from "../shared/classification.js";
-import { disableSiteForHealthCheck, getSettings, type SiteHost } from "../shared/storage.js";
+import { disableSiteForHealthCheck, getSettings, type HonestySettings, type SiteHost } from "../shared/storage.js";
 import { fireAndForget } from "../shared/async.js";
+import { logWeeklyEvent } from "../shared/weeklyEvents.js";
 
 const HOST: SiteHost | null = location.hostname === "claude.ai" ? "claude.ai" : location.hostname === "chatgpt.com" ? "chatgpt.com" : null;
 
@@ -12,6 +13,13 @@ const INJECTION_DELIMITER_END = "\n⟦honesty-layer:end⟧";
 
 let lastAppliedText = "";
 let lastAppliedDirectiveId: string | null = null;
+
+// C-6/F-9 weekly recap tracking (fixes fragility #5: this logic previously
+// had no producer). Set when the user's turn looks like pushback with no
+// new evidence; consumed exactly once, by whichever assistant message
+// comes next, to decide whether the model held its ground or capitulated.
+let awaitingPushbackOutcome = false;
+let currentModeForRecap: HonestySettings["mode"] = "calibrated";
 
 function getComposer(): HTMLElement | null {
   const selectors = HOST ? loadSelectorConfig(HOST) : null;
@@ -83,7 +91,12 @@ async function onBeforeSend(host: SiteHost) {
   if (!userText.trim()) return;
 
   const settings = await getSettings();
-  if (settings.mode === "off" || !settings.enabledSites[host]) return;
+  if (!settings.enabledSites[host]) return;
+
+  currentModeForRecap = settings.mode;
+  awaitingPushbackOutcome = assessPushback(userText).isPushback;
+
+  if (settings.mode === "off") return;
 
   const { decision } = await classifyAndSafeguard(userText, settings.mode, settings.intensity);
   if (decision.kind === "no_directive") {
@@ -101,6 +114,37 @@ async function onBeforeSend(host: SiteHost) {
 
   const withDirective = `${userText}${INJECTION_DELIMITER_START}${directive.text}${INJECTION_DELIMITER_END}`;
   writeComposerText(composer, withDirective);
+}
+
+/**
+ * Reliability fix for the previously-documented race: the host page's own
+ * submit handler used to run concurrently with our async storage read, so
+ * the directive could land one message late. This fully owns the sequence
+ * instead — the original event is cancelled before the host ever sees it,
+ * injection runs and completes, and only then do we trigger the send
+ * ourselves. `sending` lets that self-triggered event pass straight through
+ * this same listener instead of being intercepted again.
+ */
+let sending = false;
+
+async function interceptAndResend(host: SiteHost, trigger: "keydown" | "click") {
+  await onBeforeSend(host);
+
+  sending = true;
+  try {
+    if (trigger === "keydown") {
+      getComposer()?.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }));
+    } else {
+      getSendButton()?.click();
+    }
+  } finally {
+    // Reset on the next tick: the synthetic event's own (now-unintercepted)
+    // propagation and the host's handler run synchronously within this
+    // dispatch, so it's safe to drop the guard immediately after.
+    setTimeout(() => {
+      sending = false;
+    }, 0);
+  }
 }
 
 /** F-5 output detector + F-6 "Challenge this" (Section 5: < 50ms after stream completes, local heuristics only). */
@@ -123,6 +167,15 @@ function flagMessageIfSycophantic(message: HTMLElement) {
   message.dataset.honestyChecked = "true";
   const text = message.innerText;
   const flags = detectSycophancy(text);
+
+  // Consumed once per pushback turn, regardless of whether this message also gets flagged below.
+  const backedDown = awaitingPushbackOutcome && capitulatesWithoutJustification(text);
+  awaitingPushbackOutcome = false;
+  fireAndForget(
+    logWeeklyEvent({ flagged: flags.length > 0, modelBackedDownOnPushback: backedDown, modeUsed: currentModeForRecap }),
+    "logging weekly recap event"
+  );
+
   if (flags.length === 0) return;
 
   const badge = document.createElement("span");
@@ -139,15 +192,16 @@ async function sendChallenge() {
   const sendButton = getSendButton();
   if (!composer || !sendButton) return;
   writeComposerText(composer, "Are you just agreeing with me? Argue against your own last answer and tell me what would change your view.");
-  sendButton.click();
+  sending = true; // this click is ours, not a user send — don't re-run onBeforeSend on it
+  try {
+    sendButton.click();
+  } finally {
+    setTimeout(() => {
+      sending = false;
+    }, 0);
+  }
 }
 
-// Known limitation (R-2/5.2): onBeforeSend is async (storage read) while the
-// site's own Enter/click submit handler may fire synchronously, so on some
-// pages the directive can land one message late. A more robust version would
-// intercept with preventDefault + stopImmediatePropagation and resubmit
-// manually once injection completes; left as a follow-up rather than shipped
-// as a false guarantee.
 async function main() {
   if (!HOST) return;
   const settings = await getSettings();
@@ -160,15 +214,25 @@ async function main() {
   document.addEventListener(
     "keydown",
     (e) => {
-      if (e.key === "Enter" && !e.shiftKey) fireAndForget(onBeforeSend(HOST), "injecting directive on Enter");
+      if (sending) return;
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        fireAndForget(interceptAndResend(HOST, "keydown"), "injecting directive on Enter");
+      }
     },
     { capture: true }
   );
   document.addEventListener(
     "click",
     (e) => {
+      if (sending) return;
       const sendButton = getSendButton();
-      if (sendButton && (e.target === sendButton || sendButton.contains(e.target as Node))) fireAndForget(onBeforeSend(HOST), "injecting directive on send click");
+      if (sendButton && (e.target === sendButton || sendButton.contains(e.target as Node))) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        fireAndForget(interceptAndResend(HOST, "click"), "injecting directive on send click");
+      }
     },
     { capture: true }
   );

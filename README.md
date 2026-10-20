@@ -10,14 +10,18 @@ Builders (API proxy), on one shared core.
 | :- | :- | :- |
 | `packages/core` | Appendix B, F-5, F-6 | Domain types: `Directive`, `Actor`, `TaskClassification`, `AuditEvent`, sycophancy detector heuristics, pushback-stability heuristics. Pure, no I/O. |
 | `packages/registry` | F-8 | Directive Registry v0 — versioned directive files per mode × model family × intensity, with fail-closed fallback (nearest lower tested intensity, never higher). Also the C-8 wellbeing safeguard and the F-1 rule-based task classifier. |
-| `packages/benchmark` | F-9, Section 9, Section 10 | The two-sided benchmark harness: false-premise rejection, true-premise acceptance, pushback flip rate, evidence-based update rate, feedback calibration, tone, task quality. Computes the Calibration Score and the release gates from Section 9/12 (R-3). Ships a `--mock` CLI mode against a deterministic stand-in responder — **never a substitute for a real model run**; mock results are tagged `mock: true` everywhere. |
-| `packages/proxy` | F-3, F-1, F-5, F-6, F-7 | The OpenAI- and Anthropic-compatible proxy. Header-driven mode/intensity/version pinning, BYOK passthrough, zero body logging, fail-open on injection failure, fail-closed actor identity and crisis passthrough. Layered domain/application/infrastructure/presentation (A3). F-7 (Truth/Logic Evaluator) and an optional F-1 classifier are backed by an open-source Jev-compatible decision server — off by default, see [ADR-0002](docs/adr/0002-jev-decision-engine-integration.md) and `packages/proxy/README.md`. |
-| `packages/extension` | F-2, C-2 | Manifest V3 browser extension for claude.ai and chatgpt.com: toggle/mode popup, diff drawer, per-site health check + kill switch, output sycophancy flags with "Challenge this." |
+| `packages/benchmark` | F-9, Section 9, Section 10 | The two-sided benchmark harness: false-premise rejection, true-premise acceptance, pushback flip rate, evidence-based update rate, feedback calibration, tone, task quality. Computes the Calibration Score and the release gates from Section 9/12 (R-3). Ships a `--mock` CLI mode against a deterministic stand-in responder — **never a substitute for a real model run**; mock results are tagged `mock: true` everywhere. The three suites feeding the Calibration Score accept an optional LLM-judge grader instead of keyword matching — see `packages/benchmark/README.md`. |
+| `packages/proxy` | F-3, F-1, F-5, F-6, F-7 | The OpenAI- and Anthropic-compatible proxy. Header-driven mode/intensity/version pinning, BYOK passthrough, zero body logging, fail-open on injection failure, fail-closed actor identity and crisis passthrough. Layered domain/application/infrastructure/presentation (A3). F-7 (Truth/Logic Evaluator) and an optional F-1 classifier are backed by an open-source Jev-compatible decision server — off by default, see [ADR-0002](docs/adr/0002-jev-decision-engine-integration.md) and `packages/proxy/README.md`. Actor identity is a real, verified API key issued by a SQLite-backed team registry — not a self-asserted header — with a durable audit log; see [ADR-0003](docs/adr/0003-fragility-fixes.md). |
+| `packages/extension` | F-2, C-2, C-6 | Manifest V3 browser extension for claude.ai and chatgpt.com: toggle/mode popup, diff drawer, per-site health check + kill switch, output sycophancy flags with "Challenge this." The send event is fully intercepted (not raced) before injection; see ADR-0003. Weekly recap (C-6) is now backed by real event capture, shown in the popup. |
 | `apps/web-setup` | C-1 | The Honesty Setup wizard — pick apps, pick a style, get the tested per-model instruction text to paste into native custom instructions. No install required. |
 | `packages/mobile-shared` | C-3, C-4, C-5, C-6 | Shared business logic for the keyboard snippets, Second Opinion prompt/scoring, Decision Check/Journal, and the Flattery Meter/weekly recap — plus a thin client for calling the real proxy. |
 
 Run `npm install && npm run build && npm test` at the repo root to build and
-test everything (60 tests across 7 workspaces as of this writing).
+test everything (86 tests across 7 workspaces as of this writing).
+
+To run the proxy for real, provision a team first (there is no admin UI):
+`node packages/proxy/scripts/create-team.mjs "My Team"` prints an API key —
+send it as `X-Honesty-Api-Key` on every request.
 
 ## What's explicitly not here
 

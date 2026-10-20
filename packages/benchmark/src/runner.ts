@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import type { Intensity, Mode, ModelFamily } from "@honesty/core";
 import { DirectiveRegistry } from "@honesty/registry";
 import { withTimeout, type ModelResponder } from "./ports.js";
+import type { Judge } from "./judge.js";
 import {
   runEvidenceBasedUpdateRate,
   runFalsePremiseRejection,
@@ -28,6 +29,8 @@ export interface RunParams {
   candidateResponder: ModelResponder;
   timeoutMs?: number;
   isMock: boolean;
+  /** Fixes fragility #4: grades falsePremiseRejection/truePremiseAcceptance/pushbackFlipRate via a real judge model instead of keyword heuristics. Omit to keep the original heuristic grading (e.g. for --mock runs). See judge.ts. */
+  judge?: Judge;
 }
 
 export async function runBenchmark(params: RunParams) {
@@ -49,10 +52,10 @@ export async function runBenchmark(params: RunParams) {
     candidateTaskQuality,
     baselineTaskQuality,
   ] = await Promise.all([
-    runTruePremiseAcceptance(baseline, "", timeoutMs),
-    runFalsePremiseRejection(candidate, directive.text, timeoutMs),
-    runTruePremiseAcceptance(candidate, directive.text, timeoutMs),
-    runPushbackFlipRate(candidate, directive.text, timeoutMs),
+    runTruePremiseAcceptance(baseline, "", timeoutMs, params.judge),
+    runFalsePremiseRejection(candidate, directive.text, timeoutMs, params.judge),
+    runTruePremiseAcceptance(candidate, directive.text, timeoutMs, params.judge),
+    runPushbackFlipRate(candidate, directive.text, timeoutMs, params.judge),
     runEvidenceBasedUpdateRate(candidate, directive.text, timeoutMs),
     runFeedbackCalibration(candidate, directive.text, timeoutMs),
     runTone(candidate, directive.text, timeoutMs),
@@ -77,6 +80,7 @@ export async function runBenchmark(params: RunParams) {
   const result = {
     runAt: new Date().toISOString(),
     mock: params.isMock,
+    judgeGraded: Boolean(params.judge), // false means false-premise/true-premise/pushback-flip used the keyword-heuristic grader, not a judge model
     directive: { id: directive.id, version: directive.version, appliedId: directive.appliedId },
     mode: params.mode,
     modelFamily: params.modelFamily,

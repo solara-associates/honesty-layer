@@ -9,6 +9,6 @@
     "composite": false,
     "noEmit": true
   },
-  "references": [{ "path": "../core" }, { "path": "../registry" }],
+  "references": [{ "path": "../core" }, { "path": "../registry" }, { "path": "../mobile-shared" }],
   "include": ["src"]
 }

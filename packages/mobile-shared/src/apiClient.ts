@@ -5,7 +5,8 @@
  */
 export interface ProxyCallParams {
   baseUrl: string;
-  teamId: string;
+  /** Issued by the proxy's own team registry (see packages/proxy/scripts/create-team.mjs) — never a self-asserted team id. */
+  honestyApiKey: string;
   mode: "calibrated" | "brutal" | "socratic" | "redteam" | "off";
   intensity: 1 | 2 | 3 | 4 | 5;
   providerApiKey: string;
@@ -42,7 +43,7 @@ export async function callHonestyProxy(params: ProxyCallParams): Promise<{ conte
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${params.providerApiKey}`,
-        "x-honesty-team-id": params.teamId,
+        "x-honesty-api-key": params.honestyApiKey,
         "x-honesty-mode": params.mode,
         "x-honesty-intensity": String(params.intensity),
       },

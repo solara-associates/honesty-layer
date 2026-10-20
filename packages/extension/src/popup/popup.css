@@ -34,3 +34,13 @@ button {
   color: #fca5a5;
   min-height: 14px;
 }
+.recap {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #374151;
+}
+.recap p {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #d1d5db;
+}

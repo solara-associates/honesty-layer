@@ -1,7 +1,8 @@
 import { DirectiveRegistry, RuleBasedTaskClassifier } from "@honesty/registry";
 import { InjectionService } from "../application/injectionService.js";
 import { TruthLogicEvaluator } from "../application/evaluator.js";
-import { StdoutAuditSink } from "../infrastructure/auditSink.js";
+import { TeamRegistry } from "../infrastructure/teamRegistry.js";
+import { SqliteAuditSink } from "../infrastructure/sqliteAuditSink.js";
 import { UpstreamClient, defaultAnthropicBaseUrl, defaultOpenAiBaseUrl } from "../infrastructure/upstream.js";
 import { JevClient } from "../infrastructure/jevClient.js";
 import { JevTaskClassifier } from "../infrastructure/jevClassifier.js";
@@ -18,11 +19,17 @@ function buildJevClient(): JevClient | null {
   return new JevClient({ baseUrl, apiKey: process.env.HONESTY_JEV_API_KEY, model: process.env.HONESTY_JEV_MODEL });
 }
 
+/** A5.10 — declared durable store: one SQLite file (node:sqlite, no native dependency), default ./data/honesty.db. */
+function dbPath(): string {
+  return process.env.HONESTY_DB_PATH ?? "./data/honesty.db";
+}
+
 /** Composition root. Nothing here is business logic — it only wires ports to implementations (A5.1). */
 export function buildContainer() {
   const registry = new DirectiveRegistry();
   const ruleBasedClassifier = new RuleBasedTaskClassifier();
-  const auditSink = new StdoutAuditSink();
+  const teamRegistry = new TeamRegistry(dbPath());
+  const auditSink = new SqliteAuditSink(teamRegistry);
 
   const jevClient = buildJevClient();
   const classifier =
@@ -34,7 +41,7 @@ export function buildContainer() {
   const openAiUpstream = new UpstreamClient("openai", defaultOpenAiBaseUrl());
   const anthropicUpstream = new UpstreamClient("anthropic", defaultAnthropicBaseUrl());
 
-  return { injectionService, evaluator, openAiUpstream, anthropicUpstream, auditSink };
+  return { injectionService, evaluator, teamRegistry, openAiUpstream, anthropicUpstream, auditSink };
 }
 
 export type Container = ReturnType<typeof buildContainer>;

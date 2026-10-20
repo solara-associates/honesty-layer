@@ -25,7 +25,7 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
 
     let actor;
     try {
-      actor = extractActor(headers);
+      actor = extractActor(container.teamRegistry, headers);
     } catch (err) {
       if (err instanceof InvalidActorError) return reply.code(401).send({ error: err.message });
       throw err;
@@ -60,7 +60,7 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
 
     const forwardHeaders = new Headers();
     for (const [key, value] of Object.entries(request.headers)) {
-      if (!value || ["host", "content-length", "x-honesty-team-id", "x-honesty-mode", "x-honesty-intensity", "x-honesty-directive-version"].includes(key)) continue;
+      if (!value || ["host", "content-length", "x-honesty-api-key", "x-honesty-mode", "x-honesty-intensity", "x-honesty-directive-version"].includes(key)) continue;
       forwardHeaders.set(key, Array.isArray(value) ? value.join(", ") : value);
     }
     forwardHeaders.set("content-type", "application/json");
@@ -85,7 +85,7 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
 
     let actor;
     try {
-      actor = extractActor(headers);
+      actor = extractActor(container.teamRegistry, headers);
     } catch (err) {
       if (err instanceof InvalidActorError) return reply.code(401).send({ error: err.message });
       throw err;
@@ -115,7 +115,7 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
 
     const forwardHeaders = new Headers();
     for (const [key, value] of Object.entries(request.headers)) {
-      if (!value || ["host", "content-length", "x-honesty-team-id", "x-honesty-mode", "x-honesty-intensity", "x-honesty-directive-version"].includes(key)) continue;
+      if (!value || ["host", "content-length", "x-honesty-api-key", "x-honesty-mode", "x-honesty-intensity", "x-honesty-directive-version"].includes(key)) continue;
       forwardHeaders.set(key, Array.isArray(value) ? value.join(", ") : value);
     }
     forwardHeaders.set("content-type", "application/json");
@@ -140,7 +140,7 @@ export function registerRoutes(app: FastifyInstance, container: Container) {
     const headers = headerAdapter(request.headers as Record<string, string | string[] | undefined>);
 
     try {
-      extractActor(headers);
+      extractActor(container.teamRegistry, headers);
     } catch (err) {
       if (err instanceof InvalidActorError) return reply.code(401).send({ error: err.message });
       throw err;

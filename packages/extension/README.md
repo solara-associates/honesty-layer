@@ -19,12 +19,17 @@ select `packages/extension/dist`.
   extension disables itself on that site and tells the user, rather than
   silently doing nothing or corrupting the page. Before a real release,
   verify the selectors against the current claude.ai/chatgpt.com markup.
-- **Injection timing is best-effort.** `onBeforeSend` reads `chrome.storage`
-  asynchronously, while the host page's own Enter/click handler may submit
-  synchronously — see the comment above `main()` in `content.ts`. On some
-  pages the directive can land one message late. A robust fix intercepts
-  with `preventDefault`/`stopImmediatePropagation` and resubmits manually;
-  not implemented here.
+- **Injection timing is now deterministic, not raced.** The original Enter/
+  click event is fully intercepted (`preventDefault` + `stopImmediatePropagation`
+  in `main()`, `content.ts`) before the host page ever sees it; injection
+  completes; only then does `interceptAndResend` dispatch a synthetic
+  send that the host's own handler observes. `content.test.ts` proves this
+  with a simulated host listener that only ever sees post-injection text.
+  Residual risk: the synthetic `KeyboardEvent`/`.click()` may not trigger
+  every framework's event system identically to a trusted, user-originated
+  event (React generally handles both the same way via its delegated
+  listeners; a framework with stricter `isTrusted` checks might not).
+  Verify against the live site before shipping.
 - **No signed remote selector config.** Section 5.2 calls for "remote
   selector configuration (data only, no remote code)." Fetching unsigned
   JSON and trusting it would be worse than not having the feature, so only

@@ -1,12 +1,15 @@
 import type { Server } from "node:http";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import { startFakeJevServer } from "./fakeJevServer.js";
+import { provisionTestTeam } from "./testDb.js";
 import { buildServer } from "../src/server.js";
 
 let jevServer: Server | undefined;
+let apiKey: string;
 
 beforeAll(() => {
   delete process.env.HONESTY_JEV_BASE_URL;
+  apiKey = provisionTestTeam("Evaluator Test Team").apiKey;
 });
 
 afterEach(() => {
@@ -21,7 +24,7 @@ describe("POST /v1/evaluate (F-7 Truth/Logic Evaluator)", () => {
     const res = await app.inject({
       method: "POST",
       url: "/v1/evaluate",
-      headers: { "x-honesty-team-id": "team-1" },
+      headers: { "x-honesty-api-key": apiKey },
       payload: { responseText: "You're totally right, great idea!" },
     });
     expect(res.statusCode).toBe(503);
@@ -33,13 +36,24 @@ describe("POST /v1/evaluate (F-7 Truth/Logic Evaluator)", () => {
     expect(res.statusCode).toBe(401);
   });
 
+  it("rejects an unregistered API key", async () => {
+    const app = buildServer();
+    const res = await app.inject({
+      method: "POST",
+      url: "/v1/evaluate",
+      headers: { "x-honesty-api-key": "hl_live_not_registered" },
+      payload: { responseText: "hello" },
+    });
+    expect(res.statusCode).toBe(401);
+  });
+
   it("rejects a missing responseText field", async () => {
     const fake = await startFakeJevServer(() => ({ unsupported_claims: { noul: 0 } }));
     jevServer = fake.server;
     process.env.HONESTY_JEV_BASE_URL = fake.url;
 
     const app = buildServer();
-    const res = await app.inject({ method: "POST", url: "/v1/evaluate", headers: { "x-honesty-team-id": "team-1" }, payload: {} });
+    const res = await app.inject({ method: "POST", url: "/v1/evaluate", headers: { "x-honesty-api-key": apiKey }, payload: {} });
     expect(res.statusCode).toBe(400);
   });
 
@@ -57,7 +71,7 @@ describe("POST /v1/evaluate (F-7 Truth/Logic Evaluator)", () => {
     const res = await app.inject({
       method: "POST",
       url: "/v1/evaluate",
-      headers: { "x-honesty-team-id": "team-1" },
+      headers: { "x-honesty-api-key": apiKey },
       payload: { responseText: "Great idea! You're totally right." },
     });
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assessPushback } from "./pushback.js";
+import { assessPushback, capitulatesWithoutJustification } from "./pushback.js";
 
 describe("assessPushback", () => {
   it("detects pushback with no new evidence", () => {
@@ -21,5 +21,21 @@ describe("assessPushback", () => {
       "Can you expand on how the payback period calculation accounts for onboarding cost?"
     );
     expect(r.isPushback).toBe(false);
+  });
+});
+
+describe("capitulatesWithoutJustification", () => {
+  it("flags unjustified reversal", () => {
+    expect(capitulatesWithoutJustification("You're absolutely right, let me reconsider.")).toBe(true);
+  });
+
+  it("does not flag a reversal that states new reasoning", () => {
+    expect(
+      capitulatesWithoutJustification("You're right — because the churn data you shared changes the payback math entirely.")
+    ).toBe(false);
+  });
+
+  it("does not flag a response that holds its ground", () => {
+    expect(capitulatesWithoutJustification("I've re-checked the reasoning and the conclusion still holds.")).toBe(false);
   });
 });

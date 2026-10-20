@@ -1,4 +1,5 @@
 import { getSettings, updateSettings, type SiteHost } from "../shared/storage.js";
+import { getWeeklyRecap } from "../shared/weeklyEvents.js";
 import { fireAndForget } from "../shared/async.js";
 
 function currentHost(tab: chrome.tabs.Tab | undefined): SiteHost | null {
@@ -12,10 +13,28 @@ function currentHost(tab: chrome.tabs.Tab | undefined): SiteHost | null {
   return null;
 }
 
+async function renderWeeklyRecap() {
+  const container = document.getElementById("weekly-recap") as HTMLDivElement;
+  const textEl = document.getElementById("recap-text") as HTMLParagraphElement;
+  const shareButton = document.getElementById("share-recap") as HTMLButtonElement;
+
+  const { recap, shareText } = await getWeeklyRecap();
+  if (recap.totalResponses === 0) return; // nothing to show yet this week
+
+  container.hidden = false;
+  textEl.textContent = shareText;
+  shareButton.addEventListener("click", () => {
+    // C-6: numbers only, never prompt content — shareText already carries exactly that.
+    fireAndForget(navigator.clipboard.writeText(shareText), "copying recap share text");
+  });
+}
+
 async function init() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const host = currentHost(tab);
   const settings = await getSettings();
+
+  fireAndForget(renderWeeklyRecap(), "rendering weekly recap");
 
   const siteEnabledEl = document.getElementById("site-enabled") as HTMLInputElement;
   const modeEl = document.getElementById("mode") as HTMLSelectElement;

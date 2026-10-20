@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@honesty/core": "0.3.0",
+    "@honesty/mobile-shared": "0.3.0",
     "@honesty/registry": "0.3.0"
   },
   "devDependencies": {
