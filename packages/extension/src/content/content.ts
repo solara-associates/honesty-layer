@@ -49,15 +49,28 @@ function writeComposerText(el: HTMLElement, text: string): void {
   el.dispatchEvent(new InputEvent("input", { bubbles: true }));
 }
 
-/** F-2 health check / kill switch (R-2): verify the selectors this release ships with still match. */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * F-2 health check / kill switch (R-2): verify the selectors this release
+ * ships with still match. Polls for a few seconds before giving up — these
+ * are heavy client-rendered SPAs, and the composer can render after
+ * document_idle fires. A single synchronous check here previously disabled
+ * the site permanently on a slow page load alone, with no selector actually
+ * being wrong.
+ */
 async function runHealthCheck(host: SiteHost): Promise<boolean> {
-  const composerFound = getComposer() !== null;
-  if (!composerFound) {
-    await disableSiteForHealthCheck(host, "Could not find the message box on this page. Honesty Layer has turned itself off here until this is fixed.");
-    showBanner("Honesty Layer disabled itself on this page — the site's layout changed and it could not find the message box safely.");
-    return false;
+  const maxAttempts = 10;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (getComposer() !== null) return true;
+    await sleep(500);
   }
-  return true;
+
+  await disableSiteForHealthCheck(host, "Could not find the message box on this page. Honesty Layer has turned itself off here until this is fixed.");
+  showBanner("Honesty Layer disabled itself on this page — the site's layout changed and it could not find the message box safely.");
+  return false;
 }
 
 function showBanner(text: string) {

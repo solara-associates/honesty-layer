@@ -1,3 +1,10 @@
+/* Must win over .row/.recap's own display rules at equal specificity —
+   author CSS beats the UA default [hidden]{display:none} even when a
+   later JS toggle sets the attribute, which silently broke the
+   permission-needed vs. granted popup states. */
+[hidden] {
+  display: none !important;
+}
 body {
   width: 260px;
   font: 13px/1.4 system-ui, sans-serif;

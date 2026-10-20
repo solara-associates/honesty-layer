@@ -1,4 +1,4 @@
-import { getSettings, updateSettings, type SiteHost } from "../shared/storage.js";
+import { clearHealthCheckDisable, getSettings, updateSettings, type SiteHost } from "../shared/storage.js";
 import { getWeeklyRecap } from "../shared/weeklyEvents.js";
 import { fireAndForget } from "../shared/async.js";
 
@@ -59,6 +59,7 @@ async function init() {
   const intensityEl = document.getElementById("intensity") as HTMLSelectElement;
   const statusEl = document.getElementById("site-status") as HTMLParagraphElement;
   const diffButton = document.getElementById("see-what-was-added") as HTMLButtonElement;
+  const tryAgainButton = document.getElementById("try-again") as HTMLButtonElement;
 
   if (!host) {
     statusEl.textContent = "Open claude.ai, chatgpt.com, or gemini.google.com to use Honesty Layer.";
@@ -106,7 +107,20 @@ async function init() {
   intensityEl.value = String(settings.intensity === 5 ? 4 : settings.intensity); // 5 is Builders-only (6.4)
 
   const disabledReason = settings.siteDisabledByHealthCheck[host];
-  if (disabledReason) statusEl.textContent = disabledReason;
+  if (disabledReason) {
+    statusEl.textContent = disabledReason;
+    tryAgainButton.hidden = false;
+    tryAgainButton.addEventListener("click", () => {
+      fireAndForget(
+        (async () => {
+          await clearHealthCheckDisable(host);
+          if (tab?.id) await chrome.tabs.reload(tab.id);
+          window.close();
+        })(),
+        "clearing health-check disable and reloading"
+      );
+    });
+  }
 
   siteEnabledEl.addEventListener("change", () => {
     fireAndForget(updateSettings({ enabledSites: { ...settings.enabledSites, [host]: siteEnabledEl.checked } }), "saving site-enabled setting");

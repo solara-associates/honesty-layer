@@ -40,3 +40,11 @@ export async function disableSiteForHealthCheck(host: SiteHost, reason: string):
     siteDisabledByHealthCheck: { ...current.siteDisabledByHealthCheck, [host]: reason },
   });
 }
+
+/** Lets the user clear a health-check disable from the popup instead of being stuck until storage is cleared manually. */
+export async function clearHealthCheckDisable(host: SiteHost): Promise<void> {
+  const current = await getSettings();
+  const next = { ...current.siteDisabledByHealthCheck };
+  delete next[host];
+  await updateSettings({ siteDisabledByHealthCheck: next });
+}
