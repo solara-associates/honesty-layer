@@ -12,6 +12,12 @@ describe("getDirectiveForHost", () => {
     expect(directive?.modelFamily).toBe("openai");
   });
 
+  it("resolves gemini.google.com to the google family", () => {
+    const directive = getDirectiveForHost("gemini.google.com", "calibrated", 3);
+    expect(directive?.modelFamily).toBe("google");
+    expect(directive?.text).toContain("Skip compliments");
+  });
+
   it("falls back to the nearest lower authored intensity", () => {
     const directive = getDirectiveForHost("chatgpt.com", "calibrated", 2);
     expect(directive?.intensity).toBe(1);

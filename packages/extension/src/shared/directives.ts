@@ -2,7 +2,7 @@ import directives from "./directives.generated.json" with { type: "json" };
 import type { SiteHost } from "./storage.js";
 
 type DirectiveMode = "calibrated" | "brutal" | "socratic" | "redteam" | "off";
-type ModelFamily = "openai" | "anthropic";
+type ModelFamily = "openai" | "anthropic" | "google";
 
 export interface ExtensionDirective {
   id: string;
@@ -16,6 +16,7 @@ export interface ExtensionDirective {
 const HOST_TO_FAMILY: Record<SiteHost, ModelFamily> = {
   "claude.ai": "anthropic",
   "chatgpt.com": "openai",
+  "gemini.google.com": "google",
 };
 
 /** Mirrors @honesty/registry's fallback rule: nearest lower authored intensity, never higher. Kept in sync manually — see packages/extension's generator script. */

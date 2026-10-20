@@ -19,10 +19,14 @@ export interface SiteSelectors {
  * is deliberately NOT implemented here rather than implemented insecurely.
  * `loadSelectorConfig` is the single seam to add it later.
  *
- * These selectors have not been verified against the live DOM of claude.ai
- * or chatgpt.com from this environment — they are a best-effort starting
- * point. The health check in content.ts is what makes a wrong selector a
- * safe, visible failure (auto-disable + user notice) rather than a silent one.
+ * claude.ai and chatgpt.com selectors have not been verified against the
+ * live DOM from this environment — best-effort starting points. The health
+ * check in content.ts is what makes a wrong selector a safe, visible
+ * failure (auto-disable + user notice) rather than a silent one.
+ *
+ * gemini.google.com's selectors WERE verified live (2026-10-20): inspected
+ * the real composer, send button, and a real response via the DevTools
+ * console on gemini.google.com/app, not guessed.
  */
 const BUNDLED_DEFAULTS: Record<SiteHost, SiteSelectors> = {
   "claude.ai": {
@@ -36,6 +40,12 @@ const BUNDLED_DEFAULTS: Record<SiteHost, SiteSelectors> = {
     sendButtonSelector: '[data-testid="send-button"]',
     assistantMessageSelector: '[data-message-author-role="assistant"]',
     nativeInstructionsUrl: "https://chatgpt.com/#settings/Personalization",
+  },
+  "gemini.google.com": {
+    composerSelector: 'rich-textarea .ql-editor[contenteditable="true"]',
+    sendButtonSelector: 'button[aria-label="Send message"]',
+    assistantMessageSelector: "message-content",
+    nativeInstructionsUrl: "https://gemini.google.com/",
   },
 };
 

@@ -3,7 +3,7 @@
   "name": "Honesty Layer",
   "short_name": "Honesty Layer",
   "version": "0.3.0",
-  "description": "Calibrated, non-sycophantic feedback on claude.ai and chatgpt.com — see exactly what was added to your prompt and why.",
+  "description": "Calibrated, non-sycophantic feedback on claude.ai, chatgpt.com, and gemini.google.com — see exactly what was added to your prompt and why.",
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Honesty Layer"
@@ -12,8 +12,8 @@
     "service_worker": "background/background.js",
     "type": "module"
   },
-  "permissions": ["storage", "scripting"],
-  "optional_host_permissions": ["https://claude.ai/*", "https://chatgpt.com/*"],
+  "permissions": ["storage", "scripting", "activeTab"],
+  "optional_host_permissions": ["https://claude.ai/*", "https://chatgpt.com/*", "https://gemini.google.com/*"],
   "content_scripts": [
     {
       "matches": ["https://claude.ai/*"],
@@ -22,6 +22,11 @@
     },
     {
       "matches": ["https://chatgpt.com/*"],
+      "js": ["content/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://gemini.google.com/*"],
       "js": ["content/content.js"],
       "run_at": "document_idle"
     }

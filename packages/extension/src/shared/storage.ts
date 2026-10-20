@@ -3,7 +3,7 @@
  * extension uses. No other persistence layer exists in this codebase — if
  * one is added later, declare it here too.
  */
-export type SiteHost = "claude.ai" | "chatgpt.com";
+export type SiteHost = "claude.ai" | "chatgpt.com" | "gemini.google.com";
 
 export interface HonestySettings {
   enabledSites: Record<SiteHost, boolean>;
@@ -14,10 +14,10 @@ export interface HonestySettings {
 }
 
 const DEFAULTS: HonestySettings = {
-  enabledSites: { "claude.ai": true, "chatgpt.com": true },
+  enabledSites: { "claude.ai": true, "chatgpt.com": true, "gemini.google.com": true },
   mode: "calibrated",
   intensity: 3,
-  nativeSyncOffered: { "claude.ai": false, "chatgpt.com": false },
+  nativeSyncOffered: { "claude.ai": false, "chatgpt.com": false, "gemini.google.com": false },
   siteDisabledByHealthCheck: {},
 };
 

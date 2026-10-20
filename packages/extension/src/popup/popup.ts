@@ -2,15 +2,31 @@ import { getSettings, updateSettings, type SiteHost } from "../shared/storage.js
 import { getWeeklyRecap } from "../shared/weeklyEvents.js";
 import { fireAndForget } from "../shared/async.js";
 
+const KNOWN_HOSTS: SiteHost[] = ["claude.ai", "chatgpt.com", "gemini.google.com"];
+
+/**
+ * `tab.url` is undefined here unless the manifest declares "activeTab" (or
+ * host permission for that origin is already granted) — without it, Chrome
+ * hides the URL from exactly the query that would otherwise let us detect
+ * "this tab needs a permission grant," a real chicken-and-egg bug found
+ * while testing the Gemini rollout live. "activeTab" grants that visibility
+ * for this one user-gesture-triggered popup open; it doesn't persist the
+ * content script's own host permission, which is still the separate
+ * chrome.permissions.request() flow below.
+ */
 function currentHost(tab: chrome.tabs.Tab | undefined): SiteHost | null {
   if (!tab?.url) return null;
   try {
     const hostname = new URL(tab.url).hostname;
-    if (hostname === "claude.ai" || hostname === "chatgpt.com") return hostname;
+    if ((KNOWN_HOSTS as string[]).includes(hostname)) return hostname as SiteHost;
   } catch {
     // not a parseable URL (new tab page, chrome://, etc.)
   }
   return null;
+}
+
+function originPatternFor(host: SiteHost): string {
+  return `https://${host}/*`;
 }
 
 async function renderWeeklyRecap() {
@@ -36,6 +52,8 @@ async function init() {
 
   fireAndForget(renderWeeklyRecap(), "rendering weekly recap");
 
+  const grantButton = document.getElementById("grant-access") as HTMLButtonElement;
+  const siteEnabledRow = document.getElementById("site-enabled-row") as HTMLLabelElement;
   const siteEnabledEl = document.getElementById("site-enabled") as HTMLInputElement;
   const modeEl = document.getElementById("mode") as HTMLSelectElement;
   const intensityEl = document.getElementById("intensity") as HTMLSelectElement;
@@ -43,11 +61,43 @@ async function init() {
   const diffButton = document.getElementById("see-what-was-added") as HTMLButtonElement;
 
   if (!host) {
-    statusEl.textContent = "Open claude.ai or chatgpt.com to use Honesty Layer.";
-    siteEnabledEl.disabled = true;
+    statusEl.textContent = "Open claude.ai, chatgpt.com, or gemini.google.com to use Honesty Layer.";
+    siteEnabledRow.hidden = true;
     modeEl.disabled = true;
     intensityEl.disabled = true;
     diffButton.disabled = true;
+    return;
+  }
+
+  // Per-site enablement (5.2/F-2) needs the browser's own host permission, not
+  // just our own setting — host_permissions here are optional, so nothing
+  // runs on a site until chrome.permissions.request() is granted from a user
+  // gesture. Toggling our stored "enabled" setting alone does nothing if this
+  // was never granted; this is that missing grant step.
+  const origin = originPatternFor(host);
+  const hasPermission = await chrome.permissions.contains({ origins: [origin] });
+
+  if (!hasPermission) {
+    grantButton.hidden = false;
+    siteEnabledRow.hidden = true;
+    modeEl.disabled = true;
+    intensityEl.disabled = true;
+    diffButton.disabled = true;
+    statusEl.textContent = "Honesty Layer needs permission to run on this site.";
+
+    grantButton.addEventListener("click", () => {
+      fireAndForget(
+        (async () => {
+          const granted = await chrome.permissions.request({ origins: [origin] });
+          if (granted) {
+            window.close(); // reopening the popup re-runs init() against the now-granted state
+          } else {
+            statusEl.textContent = "Permission was not granted — Honesty Layer can't run here.";
+          }
+        })(),
+        "requesting host permission"
+      );
+    });
     return;
   }
 

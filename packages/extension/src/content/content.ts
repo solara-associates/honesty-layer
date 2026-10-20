@@ -6,7 +6,8 @@ import { disableSiteForHealthCheck, getSettings, type HonestySettings, type Site
 import { fireAndForget } from "../shared/async.js";
 import { logWeeklyEvent } from "../shared/weeklyEvents.js";
 
-const HOST: SiteHost | null = location.hostname === "claude.ai" ? "claude.ai" : location.hostname === "chatgpt.com" ? "chatgpt.com" : null;
+const KNOWN_HOSTS: SiteHost[] = ["claude.ai", "chatgpt.com", "gemini.google.com"];
+const HOST: SiteHost | null = (KNOWN_HOSTS as string[]).includes(location.hostname) ? (location.hostname as SiteHost) : null;
 
 const INJECTION_DELIMITER_START = "\n\n⟦honesty-layer:start⟧\n";
 const INJECTION_DELIMITER_END = "\n⟦honesty-layer:end⟧";
